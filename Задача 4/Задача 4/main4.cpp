@@ -2,6 +2,7 @@
 #include<fstream>
 #include<cstdlib>
 #include<ctime>
+#include<cassert>
 
 using namespace std;
 
@@ -72,27 +73,23 @@ void filling_money() {
 	}
 	bank.close();
 	bank_1.close();
-	if (remove("bank.bin") != 0) {
-		cout << "Error remove file";
-	}
-	if (rename("bank_1.bin", "bank.bin") != 0) {
-		cout << "Error rename file\n";
-	};
+	assert(remove("bank.bin") == 0);
+	assert(rename("bank_1.bin", "bank.bin") == 0);
 	return;
 }
 
 bool cashing_out(int& c_100, int& c_200, int& c_500, int& c_1000, int& c_2000, int& c_5000,long int& all_money, int& user_money) {
-	if (user_money > all_money || user_money < 0) {
-		cout << "Operation is not valide";
+	if (user_money > all_money || user_money < 0 || user_money % 5000 % 2000 % 1000 % 500 % 200 % 100 != 0) {
 		return false;
 	}
+	int all__money = 0, c__100 = 0, c__200 = 0, c__500 = 0, c__1000 = 0, c__2000 = 0, c__5000 = 0;
 	{	
 	if (user_money / 5000 >= 1) {
 		if (user_money / 5000 > c_5000) {
 			return false;
 		}
 		else {
-			c_5000 = user_money / 5000;
+			c__5000 = user_money / 5000;
 			user_money %= 5000;
 		}
 	}
@@ -101,7 +98,7 @@ bool cashing_out(int& c_100, int& c_200, int& c_500, int& c_1000, int& c_2000, i
 			return false;
 		}
 		else {
-			c_2000 = user_money / 2000;
+			c__2000 = user_money / 2000;
 			user_money %= 2000;
 		}
 	}
@@ -110,7 +107,7 @@ bool cashing_out(int& c_100, int& c_200, int& c_500, int& c_1000, int& c_2000, i
 			return false;
 		}
 		else {
-			c_1000 = user_money / 1000;
+			c__1000 = user_money / 1000;
 			user_money %= 1000;
 		}
 	}
@@ -119,7 +116,7 @@ bool cashing_out(int& c_100, int& c_200, int& c_500, int& c_1000, int& c_2000, i
 			return false;
 		}
 		else {
-			c_500 = user_money / 500;
+			c__500 = user_money / 500;
 			user_money %= 500;
 		}
 	}
@@ -128,7 +125,7 @@ bool cashing_out(int& c_100, int& c_200, int& c_500, int& c_1000, int& c_2000, i
 			return false;
 		}
 		else {
-			c_200 = user_money / 200;
+			c__200 = user_money / 200;
 			user_money %= 200;
 		}
 	}
@@ -137,7 +134,7 @@ bool cashing_out(int& c_100, int& c_200, int& c_500, int& c_1000, int& c_2000, i
 			return false;
 		}
 		else {
-			c_100 = user_money / 100;
+			c__100 = user_money / 100;
 			user_money %= 100;
 		}
 	}
@@ -152,29 +149,29 @@ bool cashing_out(int& c_100, int& c_200, int& c_500, int& c_1000, int& c_2000, i
 		int zero = 0;
 
 		{
-			if (bank_cash == 5000 && c_5000 != 0) {
+			if (bank_cash == 5000 && c__5000 != 0) {
 				bank_1.write(reinterpret_cast<char*>(&zero), sizeof(zero));
-				c_5000--;
+				c__5000--;
 			}
-			else if (bank_cash == 2000 && c_2000 != 0) {
+			else if (bank_cash == 2000 && c__2000 != 0) {
 				bank_1.write(reinterpret_cast<char*>(&zero), sizeof(zero));
-				c_2000--;
+				c__2000--;
 			}
-			else if (bank_cash == 1000 && c_1000 != 0) {
+			else if (bank_cash == 1000 && c__1000 != 0) {
 				bank_1.write(reinterpret_cast<char*>(&zero), sizeof(zero));
-				c_1000--;
+				c__1000--;
 			}
-			else if (bank_cash == 500 && c_500 != 0) {
+			else if (bank_cash == 500 && c__500 != 0) {
 				bank_1.write(reinterpret_cast<char*>(&zero), sizeof(zero));
-				c_500--;
+				c__500--;
 			}
-			else if (bank_cash == 200 && c_200 != 0) {
+			else if (bank_cash == 200 && c__200 != 0) {
 				bank_1.write(reinterpret_cast<char*>(&zero), sizeof(zero));
-				c_200--;
+				c__200--;
 			}
-			else if (bank_cash == 100 && c_100 != 0) {
+			else if (bank_cash == 100 && c__100 != 0) {
 				bank_1.write(reinterpret_cast<char*>(&zero), sizeof(zero));
-				c_100--;
+				c__100--;
 			}
 			else {
 				bank_1.write(reinterpret_cast<char*>(&bank_cash), sizeof(bank_cash));
@@ -183,9 +180,8 @@ bool cashing_out(int& c_100, int& c_200, int& c_500, int& c_1000, int& c_2000, i
 	}
 	bank.close();
 	bank_1.close();
-	if (remove("bank.bin") != 0 || rename("bank_1.bin", "bank.bin") != 0) {
-		cout << "Error file remove or rename";
-	}
+	assert(remove("bank.bin") == 0);
+	assert(rename("bank_1.bin", "bank.bin") == 0);
 	return true;
 }
 
@@ -207,9 +203,11 @@ int main() {
 		}
 		else if (comand == 2) {
 			int user_number;
-			cout << "how much money do you want to withdraw";
+			cout << "how much money do you want to withdraw: ";
 			cin >> user_number;
-			cashing_out(count_100, count_200, count_500, count_1000, count_2000, count_5000, all_money, user_number);
+			if (!cashing_out(count_100, count_200, count_500, count_1000, count_2000, count_5000, all_money, user_number)) {
+				cout << "Operation is not valid\n";
+			}
 			current_state_bank(count_100, count_200, count_500, count_1000, count_2000, count_5000, all_money);
 		}
 	} while (comand != 3);
